@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SCI-Rec-Exchange</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root{
+  --board:#182422; --board2:#1F2E2B; --paper:#FBF6EA; --paper2:#F4EDDC;
+  --ink:#23281F; --ink-soft:#5B5A4E; --gold:#D9A441; --gold-dark:#7A5615;
+  --coral:#C1553D; --coral-dark:#7A331F; --teal:#2F7A6D; --teal-dark:#173E37;
+  --plum:#7C5C8C; --plum-dark:#3F2C4A; --steel:#5C6B73; --steel-dark:#2B343A;
+  --sky:#3E7CA6; --sky-dark:#1F4560;
+  --line:rgba(35,40,31,.14); --danger:#B23A3A;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--board);font-family:'Inter',sans-serif;color:var(--paper);}
+.wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px;}
+header h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0 0 4px;color:var(--paper);}
+header p{margin:0;color:#B9C4BE;font-size:14px;}
+.conn-banner{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;background:var(--danger);color:#FCEBEB;padding:8px 12px;border-radius:4px;margin-bottom:16px;display:none;}
+.tabs{display:flex;gap:8px;margin:24px 0;border-bottom:1px solid rgba(251,246,234,.18);}
+.tab-btn{background:none;border:none;color:#B9C4BE;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent;margin-right:20px;}
+.tab-btn.active{color:var(--gold);border-color:var(--gold);}
+.view{display:none;} .view.active{display:block;}
+
+.card{background:var(--paper);border-radius:6px;padding:22px 24px;position:relative;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+.card::before{content:'';position:absolute;top:14px;left:14px;width:9px;height:9px;border-radius:50%;background:var(--board);box-shadow:inset 0 0 0 2px rgba(35,40,31,.15);}
+.card-inner{padding-left:8px;}
+
+label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:14px 0 5px;}
+label:first-child{margin-top:0;}
+input[type=text],input[type=search],input[type=url],select,textarea{
+  width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+  background:var(--paper2);border:1px solid var(--line);border-radius:4px;padding:9px 10px;
+}
+input[type=file]{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);}
+textarea{resize:vertical;min-height:60px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:560px){.field-row{grid-template-columns:1fr;}}
+.checks{display:flex;flex-wrap:wrap;gap:10px;}
+.check-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink);background:var(--paper2);border:1px solid var(--line);border-radius:4px;padding:6px 9px;}
+.check-item input{width:auto;}
+.hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+.img-preview-wrap{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.img-preview{width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid var(--line);display:none;}
+.img-clear{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;background:none;border:none;color:var(--ink-soft);cursor:pointer;display:none;}
+
+.stars{display:flex;gap:4px;}
+.star{font-size:22px;cursor:pointer;color:#D9D2BC;user-select:none;}
+.star.on{color:var(--gold);}
+.err{color:var(--danger);font-size:12px;margin-top:4px;display:none;}
+
+.btn{font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.04em;
+  background:var(--ink);color:var(--paper);border:none;border-radius:4px;padding:11px 18px;cursor:pointer;margin-top:18px;}
+.btn:hover{background:#3a4232;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);}
+.btn-ghost:hover{background:var(--paper2);}
+.btn-small{font-size:11px;padding:6px 10px;margin-top:8px;}
+
+.edit-toggle{margin-top:22px;padding-top:16px;border-top:1px dashed var(--line);}
+.edit-toggle summary{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:var(--ink-soft);cursor:pointer;}
+.match-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+.match-item{text-align:left;background:var(--paper2);border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-size:13px;color:var(--ink);cursor:pointer;}
+.match-item:hover{border-color:var(--gold-dark);}
+.editing-banner{background:var(--gold);color:var(--gold-dark);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;padding:6px 10px;border-radius:4px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+
+.cat-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.cat-tab{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.03em;
+  background:none;border:1px solid rgba(251,246,234,.25);color:#B9C4BE;border-radius:20px;padding:7px 14px;cursor:pointer;}
+.cat-tab.active{background:var(--gold);border-color:var(--gold);color:var(--gold-dark);}
+.search-row{margin-bottom:14px;}
+.filter-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px;}
+.filter-row select{width:auto;font-size:12px;padding:7px 8px;}
+.type-chip{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--board2);border:1px solid rgba(251,246,234,.25);color:#B9C4BE;border-radius:14px;padding:5px 11px;cursor:pointer;}
+.type-chip.on{background:var(--gold);border-color:var(--gold);color:var(--gold-dark);}
+.sort-select{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--board2);color:var(--paper);border:1px solid rgba(251,246,234,.25);border-radius:4px;padding:6px 8px;width:auto;}
+.surprise-btn{background:none;border:1px solid rgba(251,246,234,.25);color:#B9C4BE;border-radius:4px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;}
+.spacer{flex:1;}
+
+.entries{display:flex;flex-direction:column;gap:14px;}
+.entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:3px;margin-bottom:8px;}
+.tag.eats{background:#F6E6C4;color:var(--gold-dark);}
+.tag.watches{background:#F5D9D1;color:var(--coral-dark);}
+.tag.reads{background:#D3E6E2;color:var(--teal-dark);}
+.tag.shops{background:#E4D8EA;color:var(--plum-dark);}
+.tag.experiences{background:#D3E3ED;color:var(--sky-dark);}
+.tag.other{background:#DCE1E2;color:var(--steel-dark);}
+.entry-title{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:0 0 2px;color:var(--ink);}
+.entry-meta{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+.entry-fields{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;}
+.entry-fields b{color:var(--ink);font-weight:500;}
+.entry-desc{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:6px;}
+.entry-img{width:100%;max-height:170px;object-fit:cover;border-radius:4px;margin-bottom:10px;display:block;}
+.entry-link{font-size:12px;color:var(--teal-dark);text-decoration:none;font-weight:500;}
+.stars-static{font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
+.empty{color:#B9C4BE;font-size:14px;padding:30px 0;text-align:center;}
+.type-pill{display:inline-block;font-size:11px;background:var(--paper2);border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:2px 8px;margin:0 4px 4px 0;}
+
+.endorsements{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+.endorse-item{font-size:12.5px;color:var(--ink);margin-bottom:6px;}
+.endorse-item b{font-weight:600;}
+.endorse-form{display:none;margin-top:8px;gap:8px;}
+.endorse-form.open{display:flex;flex-wrap:wrap;}
+.endorse-form input{flex:1;min-width:120px;font-size:13px;padding:7px 9px;border-radius:4px;border:1px solid var(--line);background:var(--paper2);color:var(--ink);}
+.endorse-add{background:none;border:none;color:var(--teal-dark);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;cursor:pointer;padding:0;}
+
+.reviewer-row{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border-radius:6px;padding:12px 18px;cursor:pointer;}
+.reviewer-row:hover{background:var(--paper2);}
+.reviewer-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--ink);}
+.reviewer-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);}
+.back-link{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:#B9C4BE;background:none;border:none;cursor:pointer;margin-bottom:14px;padding:0;}
+.spotlight-card{border:2px solid var(--gold);}
+.spotlight-label{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>SCI Rec Exchange</h1>
+    <p>Shared recommendations from the team — eats, watches, reads, experiences, shops, and more.</p>
+  </header>
+  <div class="conn-banner" id="connBanner">Not connected to the database yet — add your Firebase config in the HTML file.</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-view="submit">Submit</button>
+    <button class="tab-btn" data-view="browse">Browse</button>
+  </div>
+
+  <div class="view active" id="view-submit">
+    <div class="card"><div class="card-inner">
+      <div class="editing-banner" id="editingBanner" style="display:none;">
+        <span id="editingLabel"></span>
+        <button class="btn-ghost btn-small" type="button" id="cancelEdit" style="margin:0;">Cancel</button>
+      </div>
+
+      <label>Category</label>
+      <select id="f-category">
+        <option value="eats">Eats</option>
+        <option value="watches">Watches</option>
+        <option value="reads">Reads</option>
+        <option value="experiences">Experiences</option>
+        <option value="shops">Shops</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label>Title</label>
+      <input type="text" id="f-title" placeholder="Name of the place, title, or thing">
+      <div class="err" id="err-title">Enter a title.</div>
+
+      <div id="dynamicFields"></div>
+
+      <label>Link (optional)</label>
+      <input type="url" id="f-link" placeholder="https://...">
+
+      <label>Photo (optional)</label>
+      <input type="file" id="f-imagefile" accept="image/*">
+      <div class="img-preview-wrap">
+        <img class="img-preview" id="imgPreview">
+        <button type="button" class="img-clear" id="imgClear">Remove photo</button>
+      </div>
+      <div class="hint">Upload a photo you took, or paste an image URL below instead.</div>
+      <input type="url" id="f-image" placeholder="https://... (direct image link)" style="margin-top:8px;">
+
+      <div class="field-row">
+        <div>
+          <label>Your name</label>
+          <input type="text" id="f-name" placeholder="So people know who to thank">
+          <div class="err" id="err-name">Enter your name.</div>
+        </div>
+        <div>
+          <label>Rating</label>
+          <div class="stars" id="ratingStars">
+            <span class="star" data-v="1">&#9733;</span><span class="star" data-v="2">&#9733;</span><span class="star" data-v="3">&#9733;</span><span class="star" data-v="4">&#9733;</span><span class="star" data-v="5">&#9733;</span>
+          </div>
+          <div class="err" id="err-rating">Pick a rating.</div>
+        </div>
+      </div>
+
+      <label>Description <span style="text-transform:none;">(optional)</span></label>
+      <textarea id="f-desc" placeholder="Why do you recommend it?"></textarea>
+
+      <button class="btn" id="submitBtn">Add recommendation</button>
+
+      <details class="edit-toggle">
+        <summary>Editing something you already submitted?</summary>
+        <div style="margin-top:10px;">
+          <label>Type your name</label>
+          <input type="text" id="editNameSearch" placeholder="Your name">
+          <div class="match-list" id="matchList"></div>
+        </div>
+      </details>
+    </div></div>
+  </div>
+
+  <div class="view" id="view-browse">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="search-row">
+      <input type="search" id="searchInput" placeholder="Search by title or keyword...">
+    </div>
+    <div style="text-align:right;margin-bottom:10px;">
+      <button class="back-link" id="wipeAllBtn" style="margin:0;">Clear all recommendations (testing)</button>
+    </div>
+    <div id="backRow"></div>
+    <div class="filter-row" id="filterRow"></div>
+    <div id="spotlightWrap"></div>
+    <div class="entries" id="entriesList"></div>
+  </div>
+</div>
+
+<script>
+/* ====== FIREBASE CONFIG — paste your project's config here ====== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDpYYMdKhx6NYGBLC9AugME_ho4PwsNvRA",
+  authDomain: "sci-rec-exchange.firebaseapp.com",
+  projectId: "sci-rec-exchange",
+  storageBucket: "sci-rec-exchange.firebasestorage.app",
+  messagingSenderId: "199308479043",
+  appId: "1:199308479043:web:620b0ce497fe1cb81c22f6"
+};
+let db = null;
+let recsCollection = null;
+try{
+  if(firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY"){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    recsCollection = db.collection('recommendations');
+  } else {
+    document.getElementById('connBanner').style.display = 'block';
+  }
+} catch(e){
+  document.getElementById('connBanner').style.display = 'block';
+}
+/* ================================================================ */
+
+const CATEGORY_LABELS = {eats:'Eats', watches:'Watches', reads:'Reads', experiences:'Experiences', shops:'Shops', other:'Other'};
+const CATEGORY_ORDER = ['eats','watches','reads','experiences','shops','other'];
+const EATS_TYPES = ['Cafe','Takeout','Sit-down','Bar','Bakery','Fast casual'];
+const EXPERIENCE_TYPES = ['Spa','Fitness/gym','Wellness/recovery','Class/studio','Outdoor activity','Other'];
+const TYPE_OPTIONS = {eats: EATS_TYPES, experiences: EXPERIENCE_TYPES};
+
+const CATEGORY_FIELDS = {
+  eats: [{key:'location',label:'Location'},{key:'cuisine',label:'Cuisine'},{key:'types',label:'Type (select all that apply)',checks:EATS_TYPES}],
+  watches: [{key:'genre',label:'Genre'},{key:'where',label:'Where to watch'}],
+  reads: [{key:'author',label:'Author'},{key:'genre',label:'Genre'}],
+  experiences: [{key:'location',label:'Location'},{key:'types',label:'Type (select all that apply)',checks:EXPERIENCE_TYPES}],
+  shops: [{key:'location',label:'Location'},{key:'sells',label:'What they sell'}],
+  other: [{key:'tag',label:'Tag / type (optional)'}]
+};
+const CATEGORY_FILTERS = {
+  eats: [{key:'location',label:'Location'},{key:'cuisine',label:'Cuisine'}],
+  watches: [{key:'genre',label:'Genre'},{key:'where',label:'Where to watch'}],
+  reads: [{key:'genre',label:'Genre'}],
+  experiences: [{key:'location',label:'Location'}],
+  shops: [{key:'location',label:'Location'},{key:'sells',label:'What they sell'}],
+  other: [{key:'tag',label:'Tag'}]
+};
+
+let recs = [];
+let editingId = null;
+let currentRating = 0;
+let activeCat = 'all';
+let activeReviewer = null;
+let filters = {};
+let spotlight = {};
+let uploadedImageData = '';
+
+function $(id){return document.getElementById(id);}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
+if(recsCollection){
+  recsCollection.onSnapshot(snap=>{
+    recs = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCatTabs(); renderFilterRow(); renderEntries();
+  }, err=>{ console.error(err); });
+}
+
+function renderDynamicFields(){
+  const cat = $('f-category').value;
+  const container = $('dynamicFields');
+  container.innerHTML = '';
+  CATEGORY_FIELDS[cat].forEach(f=>{
+    const label = document.createElement('label');
+    label.textContent = f.label;
+    container.appendChild(label);
+    if(f.checks){
+      const wrap = document.createElement('div');
+      wrap.className = 'checks';
+      f.checks.forEach(opt=>{
+        const item = document.createElement('label');
+        item.className='check-item'; item.style.margin='0'; item.style.textTransform='none';
+        item.innerHTML = `<input type="checkbox" class="dfchk-${f.key}" value="${opt}"> ${opt}`;
+        wrap.appendChild(item);
+      });
+      container.appendChild(wrap);
+    } else {
+      const inp = document.createElement('input');
+      inp.type='text'; inp.id='df-'+f.key;
+      container.appendChild(inp);
+    }
+  });
+}
+$('f-category').addEventListener('change', renderDynamicFields);
+renderDynamicFields();
+
+$('ratingStars').addEventListener('click', e=>{
+  if(!e.target.classList.contains('star')) return;
+  currentRating = parseInt(e.target.dataset.v);
+  paintStars();
+});
+function paintStars(){
+  document.querySelectorAll('#ratingStars .star').forEach(s=>{
+    s.classList.toggle('on', parseInt(s.dataset.v) <= currentRating);
+  });
+  if(currentRating>0) $('err-rating').style.display='none';
+}
+
+function showPreview(dataUrl){
+  $('imgPreview').src = dataUrl;
+  $('imgPreview').style.display = 'block';
+  $('imgClear').style.display = 'inline-block';
+}
+function clearPreview(){
+  uploadedImageData = '';
+  $('imgPreview').style.display = 'none';
+  $('imgClear').style.display = 'none';
+  $('f-imagefile').value = '';
+}
+$('imgClear').addEventListener('click', clearPreview);
+
+$('f-imagefile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = evt=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxW = 800;
+      const scale = Math.min(1, maxW/img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width*scale; canvas.height = img.height*scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      let quality = 0.82;
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      while(dataUrl.length > 700000 && quality > 0.35){ quality -= 0.15; dataUrl = canvas.toDataURL('image/jpeg', quality); }
+      if(dataUrl.length > 900000){
+        alert('That photo is too large even after compressing — try a smaller image.');
+        clearPreview(); return;
+      }
+      uploadedImageData = dataUrl;
+      $('f-image').value = '';
+      showPreview(uploadedImageData);
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    $('view-'+b.dataset.view).classList.add('active');
+    if(b.dataset.view==='browse'){ renderCatTabs(); renderFilterRow(); renderEntries(); }
+  });
+});
+
+function resetForm(){
+  editingId = null;
+  $('editingBanner').style.display = 'none';
+  $('f-title').value=''; $('f-name').value=''; $('f-desc').value=''; $('f-link').value=''; $('f-image').value='';
+  clearPreview();
+  currentRating = 0; paintStars();
+  $('submitBtn').textContent = 'Add recommendation';
+  renderDynamicFields();
+}
+$('cancelEdit').addEventListener('click', resetForm);
+
+$('submitBtn').addEventListener('click', async ()=>{
+  if(!recsCollection){ alert('Database not connected yet — add your Firebase config in the HTML file.'); return; }
+  const title = $('f-title').value.trim();
+  const name = $('f-name').value.trim();
+  $('err-title').style.display = title ? 'none':'block';
+  $('err-name').style.display = name ? 'none':'block';
+  $('err-rating').style.display = currentRating>0 ? 'none':'block';
+  if(!title || !name || currentRating===0) return;
+
+  const cat = $('f-category').value;
+  const fields = {};
+  CATEGORY_FIELDS[cat].forEach(f=>{
+    if(f.checks){
+      fields[f.key] = Array.from(document.querySelectorAll('.dfchk-'+f.key+':checked')).map(c=>c.value);
+    } else {
+      fields[f.key] = $('df-'+f.key).value.trim();
+    }
+  });
+
+  const imageValue = uploadedImageData || $('f-image').value.trim();
+  const common = {
+    category:cat, title, submittedBy:name, rating:currentRating,
+    description:$('f-desc').value.trim(), link:$('f-link').value.trim(), image:imageValue, fields
+  };
+
+  $('submitBtn').disabled = true;
+  try{
+    if(editingId){
+      await recsCollection.doc(editingId).update({...common, editedAt:Date.now()});
+    } else {
+      await recsCollection.add({...common, endorsements:[], createdAt:Date.now()});
+    }
+    resetForm();
+    document.querySelector('.tab-btn[data-view="browse"]').click();
+  } catch(e){
+    alert('Could not save: '+e.message);
+  } finally {
+    $('submitBtn').disabled = false;
+  }
+});
+
+$('editNameSearch').addEventListener('input', ()=>{
+  const q = $('editNameSearch').value.trim().toLowerCase();
+  const list = $('matchList');
+  list.innerHTML = '';
+  if(!q) return;
+  const matches = recs.filter(r=>r.submittedBy.toLowerCase()===q);
+  if(matches.length===0){
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);">No submissions found under that name.</div>';
+    return;
+  }
+  matches.forEach(r=>{
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='match-item';
+    btn.textContent = `${r.title} (${CATEGORY_LABELS[r.category]})`;
+    btn.addEventListener('click', ()=>loadEntryForEdit(r));
+    list.appendChild(btn);
+  });
+});
+
+function loadEntryForEdit(r){
+  editingId = r.id;
+  $('f-category').value = r.category; renderDynamicFields();
+  $('f-title').value = r.title;
+  $('f-name').value = r.submittedBy;
+  $('f-desc').value = r.description || '';
+  $('f-link').value = r.link || '';
+  clearPreview();
+  if(r.image && r.image.startsWith('data:')){ uploadedImageData = r.image; showPreview(r.image); }
+  else { $('f-image').value = r.image || ''; }
+  currentRating = r.rating; paintStars();
+  CATEGORY_FIELDS[r.category].forEach(f=>{
+    if(f.checks){
+      const vals = r.fields[f.key] || [];
+      document.querySelectorAll('.dfchk-'+f.key).forEach(cb=>{ cb.checked = vals.includes(cb.value); });
+    } else {
+      const el=$('df-'+f.key); if(el) el.value = r.fields[f.key] || '';
+    }
+  });
+  $('editingBanner').style.display='flex';
+  $('editingLabel').textContent = 'Editing "'+r.title+'"';
+  $('submitBtn').textContent = 'Update recommendation';
+  document.querySelector('.tab-btn[data-view="submit"]').click();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderCatTabs(){
+  const tabs = [{key:'all',label:'All'}, ...CATEGORY_ORDER.map(k=>({key:k,label:CATEGORY_LABELS[k]})), {key:'reviewer',label:'By reviewer'}];
+  $('catTabs').innerHTML = tabs.map(t=>`<button class="cat-tab ${activeCat===t.key?'active':''}" data-cat="${t.key}">${t.label}</button>`).join('');
+  $('catTabs').querySelectorAll('.cat-tab').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      activeCat = b.dataset.cat; activeReviewer = null; filters = {};
+      renderCatTabs(); renderFilterRow(); renderEntries();
+    });
+  });
+}
+
+function distinctValues(catKey, fieldKey){
+  const vals = recs.filter(r=>r.category===catKey).map(r=>r.fields[fieldKey]).filter(v=>v && !Array.isArray(v));
+  return Array.from(new Set(vals)).sort();
+}
+
+function renderFilterRow(){
+  const row = $('filterRow');
+  const back = $('backRow');
+  back.innerHTML = '';
+  row.innerHTML = '';
+  if(activeCat==='reviewer'){
+    $('spotlightWrap').innerHTML = '';
+    if(activeReviewer){
+      back.innerHTML = `<button class="back-link" id="backToReviewers">&larr; All reviewers</button>`;
+      $('backToReviewers').addEventListener('click', ()=>{ activeReviewer=null; renderFilterRow(); renderEntries(); });
+    }
+    return;
+  }
+  if(activeCat==='all'){ $('spotlightWrap').innerHTML = ''; return; }
+
+  row.innerHTML += `<select class="sort-select" id="sortSelect"><option value="new">Latest submission</option><option value="rating">Top rated</option></select>`;
+  (CATEGORY_FILTERS[activeCat]||[]).forEach(f=>{
+    const opts = distinctValues(activeCat, f.key);
+    row.innerHTML += `<select class="sort-select" data-filter="${f.key}"><option value="">${f.label}: any</option>${opts.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('')}</select>`;
+  });
+  if(TYPE_OPTIONS[activeCat]){
+    TYPE_OPTIONS[activeCat].forEach(t=>{
+      row.innerHTML += `<button type="button" class="type-chip" data-type="${t}">${t}</button>`;
+    });
+  }
+  row.innerHTML += `<span class="spacer"></span><button class="surprise-btn" id="surpriseBtn">Surprise me</button>`;
+
+  $('sortSelect').addEventListener('change', renderEntries);
+  row.querySelectorAll('[data-filter]').forEach(sel=>{
+    sel.addEventListener('change', ()=>{ filters[sel.dataset.filter]=sel.value; renderEntries(); });
+  });
+  row.querySelectorAll('[data-type]').forEach(chip=>{
+    if((filters.types||[]).includes(chip.dataset.type)) chip.classList.add('on');
+    chip.addEventListener('click', ()=>{
+      filters.types = filters.types || [];
+      const t = chip.dataset.type;
+      filters.types = filters.types.includes(t) ? filters.types.filter(x=>x!==t) : [...filters.types, t];
+      renderFilterRow(); renderEntries();
+    });
+  });
+  $('surpriseBtn').addEventListener('click', ()=>{
+    const pool = computeFilteredList(false);
+    if(pool.length===0){ $('spotlightWrap').innerHTML = '<div class="empty">Nothing matches the current filters to pick from.</div>'; return; }
+    spotlight[activeCat] = pool[Math.floor(Math.random()*pool.length)];
+    renderEntries();
+  });
+}
+
+$('searchInput').addEventListener('input', renderEntries);
+$('wipeAllBtn').addEventListener('click', async ()=>{
+  if(!recsCollection){ alert('Database not connected yet.'); return; }
+  if(recs.length===0){ alert('Nothing to clear.'); return; }
+  const typed = prompt('Type DELETE to permanently remove all '+recs.length+' entries.');
+  if(typed !== 'DELETE') return;
+  const batch = db.batch();
+  const snap = await recsCollection.get();
+  snap.docs.forEach(d=> batch.delete(d.ref));
+  await batch.commit();
+  spotlight = {};
+});
+
+function computeFilteredList(excludeSpotlight){
+  let items;
+  if(activeCat==='all'){ items = recs.slice(); }
+  else if(activeCat==='reviewer'){ items = activeReviewer ? recs.filter(r=>r.submittedBy===activeReviewer) : []; }
+  else { items = recs.filter(r=>r.category===activeCat); }
+
+  const q = $('searchInput').value.trim().toLowerCase();
+  if(q){
+    items = items.filter(r=>{
+      const hay = [r.title, r.description, r.submittedBy, ...Object.values(r.fields||{}).flat()].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  if(activeCat!=='all' && activeCat!=='reviewer'){
+    (CATEGORY_FILTERS[activeCat]||[]).forEach(f=>{
+      if(filters[f.key]){ items = items.filter(r=>r.fields[f.key]===filters[f.key]); }
+    });
+    if(TYPE_OPTIONS[activeCat] && filters.types && filters.types.length>0){
+      items = items.filter(r=>(r.fields.types||[]).some(t=>filters.types.includes(t)));
+    }
+  }
+  if(excludeSpotlight!==false && spotlight[activeCat]){
+    items = items.filter(r=>r.id!==spotlight[activeCat].id);
+  }
+  const sortVal = $('sortSelect') ? $('sortSelect').value : 'new';
+  if(sortVal==='rating'){ items.sort((a,b)=> b.rating-a.rating || b.createdAt-a.createdAt); }
+  else { items.sort((a,b)=> b.createdAt-a.createdAt); }
+  return items;
+}
+
+function buildCardHtml(r){
+  const catFields = CATEGORY_FIELDS[r.category];
+  let fieldsHtml = '';
+  catFields.forEach(f=>{
+    const v = r.fields[f.key];
+    if(f.checks){
+      if(v && v.length) fieldsHtml += (v.map(x=>`<span class="type-pill">${escapeHtml(x)}</span>`).join(''));
+    } else if(v){
+      fieldsHtml += `<span><b>${f.label}:</b> ${escapeHtml(v)}</span>`;
+    }
+  });
+  const endorseHtml = (r.endorsements||[]).map(e=>
+    `<div class="endorse-item"><b>${escapeHtml(e.name)}</b>${e.comment ? ' — '+escapeHtml(e.comment) : ' also recommends this.'}</div>`
+  ).join('');
+  return `
+    <div class="card-inner">
+      ${r.image ? `<img class="entry-img" src="${escapeHtml(r.image)}" onerror="this.style.display='none'">` : ''}
+      <div class="entry-top">
+        <div>
+          <span class="tag ${r.category}">${CATEGORY_LABELS[r.category]}</span>
+          <h3 class="entry-title">${escapeHtml(r.title)}</h3>
+          <div class="entry-meta">Recommended by ${escapeHtml(r.submittedBy)}${r.editedAt ? ' &middot; edited' : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
+        </div>
+        <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}</div>
+      </div>
+      <div class="entry-fields">${fieldsHtml}</div>
+      ${r.description ? `<div class="entry-desc">${escapeHtml(r.description)}</div>` : ''}
+      <div class="endorsements">
+        ${endorseHtml}
+        <button class="endorse-add" data-id="${r.id}">+ I've also tried this</button>
+        <div class="endorse-form" id="ef-${r.id}">
+          <input type="text" placeholder="Your name" id="en-name-${r.id}">
+          <input type="text" placeholder="Optional comment" id="en-comment-${r.id}">
+          <button class="btn btn-small" style="margin:0;" data-add="${r.id}">Add</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindCardHandlers(container){
+  container.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const target = recs.find(r=>r.id===b.dataset.del);
+      if(!confirm('Delete "'+(target?target.title:'this entry')+'"? This cannot be undone.')) return;
+      await recsCollection.doc(b.dataset.del).delete();
+    });
+  });
+  container.querySelectorAll('.endorse-add').forEach(b=>{
+    b.addEventListener('click', ()=>{ $('ef-'+b.dataset.id).classList.toggle('open'); });
+  });
+  container.querySelectorAll('[data-add]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const id = b.dataset.add;
+      const name = $('en-name-'+id).value.trim();
+      const comment = $('en-comment-'+id).value.trim();
+      if(!name) return;
+      await recsCollection.doc(id).update({
+        endorsements: firebase.firestore.FieldValue.arrayUnion({name, comment, ts:Date.now()})
+      });
+    });
+  });
+}
+
+function renderEntries(){
+  const spotWrap = $('spotlightWrap');
+  const list = $('entriesList');
+
+  if(activeCat==='reviewer' && !activeReviewer){
+    spotWrap.innerHTML = '';
+    const groups = {};
+    recs.forEach(r=>{
+      const key = r.submittedBy.toLowerCase();
+      if(!groups[key]) groups[key] = {name:r.submittedBy, count:0};
+      groups[key].count++;
+    });
+    const arr = Object.values(groups).sort((a,b)=> b.count-a.count || a.name.localeCompare(b.name));
+    list.innerHTML = arr.length===0 ? '<div class="empty">No recommendations yet.</div>' :
+      arr.map(g=>`<div class="reviewer-row" data-name="${escapeHtml(g.name)}"><span class="reviewer-name">${escapeHtml(g.name)}</span><span class="reviewer-count">${g.count} rec${g.count!==1?'s':''}</span></div>`).join('');
+    list.querySelectorAll('.reviewer-row').forEach(row=>{
+      row.addEventListener('click', ()=>{ activeReviewer = row.dataset.name; renderFilterRow(); renderEntries(); });
+    });
+    return;
+  }
+
+  if(spotlight[activeCat] && activeCat!=='all' && activeCat!=='reviewer'){
+    const stillExists = recs.find(r=>r.id===spotlight[activeCat].id);
+    if(!stillExists){ delete spotlight[activeCat]; }
+  }
+  if(spotlight[activeCat] && activeCat!=='all' && activeCat!=='reviewer'){
+    spotWrap.innerHTML = `<div class="card spotlight-card"><div class="spotlight-label"><span>Surprise pick</span><span><button class="back-link" id="clearSpot" style="margin:0;">Clear</button></span></div>${buildCardHtml(spotlight[activeCat])}</div>`;
+    bindCardHandlers(spotWrap);
+    $('clearSpot').addEventListener('click', ()=>{ delete spotlight[activeCat]; renderEntries(); });
+  } else {
+    spotWrap.innerHTML = '';
+  }
+
+  const items = computeFilteredList(true);
+  if(items.length===0){
+    list.innerHTML = '<div class="empty">No recommendations here yet. Add one from the Submit tab.</div>';
+    return;
+  }
+  list.innerHTML = items.map(r=>`<div class="card">${buildCardHtml(r)}</div>`).join('');
+  bindCardHandlers(list);
+}
+
+renderCatTabs(); renderFilterRow(); renderEntries();
+</script>
+</body>
+</html>
