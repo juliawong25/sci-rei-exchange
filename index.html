@@ -114,8 +114,8 @@ textarea{resize:vertical;min-height:60px;}
 .entry-desc{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:6px;}
 .entry-img{width:100%;max-height:170px;object-fit:cover;border-radius:4px;margin-bottom:10px;display:block;}
 .entry-link{font-size:12px;color:var(--teal-dark);text-decoration:none;font-weight:500;}
-.stars-static{font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
-.fav-btn{display:block;margin-top:6px;margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:14px;padding:4px 10px;cursor:pointer;}
+.stars-static{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
+.fav-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:14px;padding:4px 10px;cursor:pointer;}
 .fav-btn.on{background:var(--gold);border-color:var(--gold);color:var(--gold-dark);}
 .empty{color:var(--ink-soft);font-size:14px;padding:30px 0;text-align:center;}
 .type-pill{display:inline-block;font-size:11px;background:var(--paper2);border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:2px 8px;margin:0 4px 4px 0;}
@@ -666,7 +666,7 @@ function buildCardHtml(r){
         <div>
           <span class="tag ${r.category}">${CATEGORY_LABELS[r.category]}</span>
           <h3 class="entry-title">${escapeHtml(r.title)}</h3>
-          <div class="entry-meta">Recommended by ${escapeHtml(r.submittedBy)} on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
+          <div class="entry-meta">Recommended by <b style="color:var(--ink);font-weight:600;">${escapeHtml(r.submittedBy)}</b> on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
         </div>
         <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}<button class="fav-btn ${favorites.includes(r.id)?'on':''}" data-fav="${r.id}">${favorites.includes(r.id) ? '\u2605 Saved' : '\u2606 Save'}</button></div>
       </div>
