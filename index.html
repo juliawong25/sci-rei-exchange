@@ -99,6 +99,8 @@ textarea{resize:vertical;min-height:60px;}
 .entry-img{width:100%;max-height:170px;object-fit:cover;border-radius:4px;margin-bottom:10px;display:block;}
 .entry-link{font-size:12px;color:var(--teal-dark);text-decoration:none;font-weight:500;}
 .stars-static{font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
+.fav-btn{display:block;margin-top:6px;margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:14px;padding:4px 10px;cursor:pointer;}
+.fav-btn.on{background:var(--gold);border-color:var(--gold);color:var(--gold-dark);}
 .empty{color:#B9C4BE;font-size:14px;padding:30px 0;text-align:center;}
 .type-pill{display:inline-block;font-size:11px;background:var(--paper2);border:1px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:2px 8px;margin:0 4px 4px 0;}
 
@@ -138,6 +140,7 @@ textarea{resize:vertical;min-height:60px;}
         <span id="editingLabel"></span>
         <button class="btn-ghost btn-small" type="button" id="cancelEdit" style="margin:0;">Cancel</button>
       </div>
+      <div class="hint" style="margin-bottom:14px;">Tip: you can save recs to revisit later from the Browse tab. Saved items live in your browser, so they won't follow you to a different device or browser.</div>
 
       <label>Category</label>
       <select id="f-category">
@@ -272,6 +275,9 @@ let activeReviewer = null;
 let filters = {};
 let spotlight = {};
 let uploadedImageData = '';
+function loadFavorites(){ try{ return JSON.parse(localStorage.getItem('sci-rec-favorites')||'[]'); } catch(e){ return []; } }
+function saveFavorites(){ try{ localStorage.setItem('sci-rec-favorites', JSON.stringify(favorites)); } catch(e){} }
+let favorites = loadFavorites();
 
 function $(id){return document.getElementById(id);}
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
@@ -480,7 +486,7 @@ function loadEntryForEdit(r){
 }
 
 function renderCatTabs(){
-  const tabs = [{key:'all',label:'All'}, ...CATEGORY_ORDER.map(k=>({key:k,label:CATEGORY_LABELS[k]})), {key:'reviewer',label:'By reviewer'}];
+  const tabs = [{key:'all',label:'All'}, ...CATEGORY_ORDER.map(k=>({key:k,label:CATEGORY_LABELS[k]})), {key:'favorites',label:'Favorites'}, {key:'reviewer',label:'By reviewer'}];
   $('catTabs').innerHTML = tabs.map(t=>`<button class="cat-tab ${activeCat===t.key?'active':''}" data-cat="${t.key}">${t.label}</button>`).join('');
   $('catTabs').querySelectorAll('.cat-tab').forEach(b=>{
     b.addEventListener('click', ()=>{
@@ -508,7 +514,7 @@ function renderFilterRow(){
     }
     return;
   }
-  if(activeCat==='all'){ $('spotlightWrap').innerHTML = ''; return; }
+  if(activeCat==='all' || activeCat==='favorites'){ $('spotlightWrap').innerHTML = ''; return; }
 
   row.innerHTML += `<select class="sort-select" id="sortSelect"><option value="new">Latest submission</option><option value="rating">Top rated</option></select>`;
   (CATEGORY_FILTERS[activeCat]||[]).forEach(f=>{
@@ -559,6 +565,7 @@ $('wipeAllBtn').addEventListener('click', async ()=>{
 function computeFilteredList(excludeSpotlight){
   let items;
   if(activeCat==='all'){ items = recs.slice(); }
+  else if(activeCat==='favorites'){ items = recs.filter(r=>favorites.includes(r.id)); }
   else if(activeCat==='reviewer'){ items = activeReviewer ? recs.filter(r=>r.submittedBy===activeReviewer) : []; }
   else { items = recs.filter(r=>r.category===activeCat); }
 
@@ -609,7 +616,7 @@ function buildCardHtml(r){
           <h3 class="entry-title">${escapeHtml(r.title)}</h3>
           <div class="entry-meta">Recommended by ${escapeHtml(r.submittedBy)} on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
         </div>
-        <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}</div>
+        <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}<button class="fav-btn ${favorites.includes(r.id)?'on':''}" data-fav="${r.id}">${favorites.includes(r.id) ? '\u2605 Saved' : '\u2606 Save'}</button></div>
       </div>
       <div class="entry-fields">${fieldsHtml}</div>
       ${r.description ? `<div class="entry-desc">${escapeHtml(r.description)}</div>` : ''}
@@ -626,6 +633,14 @@ function buildCardHtml(r){
 }
 
 function bindCardHandlers(container){
+  container.querySelectorAll('[data-fav]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const id = b.dataset.fav;
+      favorites = favorites.includes(id) ? favorites.filter(x=>x!==id) : [...favorites, id];
+      saveFavorites();
+      renderEntries();
+    });
+  });
   container.querySelectorAll('[data-del]').forEach(b=>{
     b.addEventListener('click', async ()=>{
       const target = recs.find(r=>r.id===b.dataset.del);
