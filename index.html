@@ -8,14 +8,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 
 :root{
   --board:#FFF8ED; --board2:#EDE7D8; --paper:#FFFFFF; --paper2:#E6E2D9;
-  --ink:#332D6B; --ink-soft:#6F6A93; --gold:#FF9F1C; --gold-dark:#8A4E00;
-  --coral:#D9573B; --coral-dark:#7A2818; --teal:#3FB6AA; --teal-dark:#0F5C56;
-  --plum:#4A4090; --plum-dark:#2A2458; --steel:#8A8DA0; --steel-dark:#3F4250;
-  --sky:#5B8FBF; --sky-dark:#1F4560;
+  --ink:#332D6B; --ink-soft:#6F6A93; --gold:#FCCA46; --gold-dark:#7A5B00;
+  --coral:#E63946; --coral-dark:#7A1620; --teal:#6A994E; --teal-dark:#2E4A1F;
+  --plum:#F4A261; --plum-dark:#7A3D14; --steel:#A69B8D; --steel-dark:#4A4438;
+  --sky:#FF9F1C; --sky-dark:#7A3D00;
   --line:rgba(51,45,107,.15); --danger:#D64545;
 }
 *{box-sizing:border-box;}
@@ -23,10 +23,18 @@ body{margin:0;background:var(--board);font-family:'Inter',sans-serif;color:var(-
 .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px;}
 @media(max-width:480px){
   .wrap{padding:20px 14px 48px;}
-  header h1{font-size:26px;}
+  .title-banner h1{font-size:19px;}
+  .banner-tail{height:32px;width:13px;}
   .card{padding:18px 16px;}
 }
-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0 0 4px;color:var(--ink);}
+.title-banner{display:inline-flex;align-items:center;margin-bottom:10px;}
+.banner-tail{width:16px;height:38px;background:#221D47;}
+.banner-tail-left{clip-path:polygon(100% 0%,0% 0%,28% 50%,0% 100%,100% 100%);margin-right:-6px;}
+.banner-tail-right{clip-path:polygon(0% 0%,100% 0%,72% 50%,100% 100%,0% 100%);margin-left:-6px;}
+.banner-body{background:#332D6B;border-radius:14px;padding:10px 26px;position:relative;z-index:1;}
+.title-banner h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:0;color:#FCCA46;white-space:nowrap;}
+.title-banner h1 .bang{color:#FF9F1C;}
+header{text-align:center;}
 header p{margin:0;color:var(--ink-soft);font-size:14px;}
 .conn-banner{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;background:var(--danger);color:#FCEBEB;padding:8px 12px;border-radius:4px;margin-bottom:16px;display:none;}
 .tabs{display:flex;gap:6px;margin:24px 0 0;border-bottom:3px solid var(--ink);}
@@ -35,7 +43,7 @@ header p{margin:0;color:var(--ink-soft);font-size:14px;}
 .view{padding-top:20px;}
 .view{display:none;} .view.active{display:block;}
 
-.card{background:var(--paper);border-radius:6px;padding:22px 24px;position:relative;box-shadow:0 4px 14px rgba(51,45,107,.10);border:1px solid rgba(51,45,107,.16);}
+.card{background:var(--paper);border-radius:6px;padding:22px 24px;position:relative;box-shadow:0 4px 14px rgba(51,45,107,.10);border:1.5px solid rgba(51,45,107,.35);}
 .card::before{content:'';position:absolute;top:14px;left:14px;width:9px;height:9px;border-radius:50%;background:var(--paper2);box-shadow:inset 0 0 0 2px rgba(46,46,46,.15);}
 .card-inner{padding-left:8px;}
 
@@ -93,13 +101,13 @@ textarea{resize:vertical;min-height:60px;}
 .entries{display:flex;flex-direction:column;gap:14px;}
 .entry-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;}
 .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:3px;margin-bottom:8px;}
-.tag.eats{background:#FFE7C2;color:var(--gold-dark);}
-.tag.watches{background:#F7DAD3;color:var(--coral-dark);}
-.tag.reads{background:#D9F0ED;color:var(--teal-dark);}
-.tag.shops{background:#E3E0F2;color:var(--plum-dark);}
-.tag.experiences{background:#DCEAF5;color:var(--sky-dark);}
-.tag.other{background:#E7E8ED;color:var(--steel-dark);}
-.entry-title{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:0 0 2px;color:var(--ink);}
+.tag.eats{background:#FFF3C7;color:var(--gold-dark);}
+.tag.watches{background:#FBD9DA;color:var(--coral-dark);}
+.tag.reads{background:#E1EBD3;color:var(--teal-dark);}
+.tag.shops{background:#FCE3CB;color:var(--plum-dark);}
+.tag.experiences{background:#FFE7C2;color:var(--sky-dark);}
+.tag.other{background:#EFEBE3;color:var(--steel-dark);}
+.entry-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;margin:0 0 2px;color:var(--ink);}
 .entry-meta{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
 .entry-fields{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;}
 .entry-fields b{color:var(--ink);font-weight:500;}
@@ -122,17 +130,26 @@ textarea{resize:vertical;min-height:60px;}
 
 .reviewer-row{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border-radius:6px;padding:12px 18px;cursor:pointer;}
 .reviewer-row:hover{background:var(--paper2);}
-.reviewer-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--ink);}
+.reviewer-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--ink);}
 .reviewer-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);}
 .back-link{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:var(--ink-soft);background:none;border:none;cursor:pointer;margin-bottom:14px;padding:0;}
-.spotlight-card{border:2px solid var(--gold);}
+.entries .card{transition:transform .15s ease, box-shadow .15s ease;}
+.entries .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(51,45,107,.20);}
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(140px) rotate(360deg);opacity:0;}}
+.confetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall .9s ease-out forwards;}
+@keyframes spotlight-in{0%{transform:translateY(-18px) scale(.95);opacity:0;}60%{transform:translateY(4px) scale(1.02);opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
+.spotlight-card{border:2px solid var(--gold);animation:spotlight-in .45s ease-out;}
 .spotlight-label{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>SCI Rec Exchange!! 🤭</h1>
+    <div class="title-banner">
+      <div class="banner-tail banner-tail-left"></div>
+      <div class="banner-body"><h1>SCI Rec Exchange<span class="bang">!!</span> 🤭</h1></div>
+      <div class="banner-tail banner-tail-right"></div>
+    </div>
     <p>Shared recommendations from the team — eats, watches, reads, experiences, shops, and more!</p>
   </header>
   <div class="conn-banner" id="connBanner">Not connected to the database yet — add your Firebase config in the HTML file.</div>
@@ -254,6 +271,11 @@ const WATCHES_TYPES = ['TV Series','Movie','Short Film','Documentary','Anime','L
 const READS_TYPES = ['Physical book','E-book','Audiobook','Graphic novel/Comic','Blog/Substack'];
 const SHOPS_TYPES = ['In-store','Online'];
 const TYPE_OPTIONS = {eats: EATS_TYPES, experiences: EXPERIENCE_TYPES, watches: WATCHES_TYPES, reads: READS_TYPES, shops: SHOPS_TYPES};
+const CATEGORY_ACCENT = {
+  eats: ['var(--gold)','var(--gold-dark)'], watches: ['var(--coral)','var(--coral-dark)'],
+  reads: ['var(--teal)','var(--teal-dark)'], experiences: ['var(--sky)','var(--sky-dark)'],
+  shops: ['var(--plum)','var(--plum-dark)'], other: ['var(--steel)','var(--steel-dark)']
+};
 
 const CATEGORY_FIELDS = {
   eats: [{key:'location',label:'Location',required:true},{key:'cuisine',label:'Cuisine',required:true},{key:'types',label:'Type (select all that apply)',checks:EATS_TYPES}],
@@ -286,6 +308,22 @@ let favorites = loadFavorites();
 
 function $(id){return document.getElementById(id);}
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+const EMPTY_QUIPS = ["Nothing here yet — be the first!","Crickets... someone add a rec!","This shelf is empty. Fill it up!","No recs yet. The floor is yours.","Blank canvas — what's your pick?"];
+function emptyMessage(){ return EMPTY_QUIPS[Math.floor(Math.random()*EMPTY_QUIPS.length)]; }
+function launchConfetti(originEl){
+  const colors = ['#FCCA46','#E63946','#6A994E','#F4A261','#FF9F1C'];
+  const rect = originEl.getBoundingClientRect();
+  for(let i=0;i<24;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = (rect.left + rect.width/2 + (Math.random()*160-80)) + 'px';
+    p.style.top = (rect.top + rect.height/2) + 'px';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay = (Math.random()*0.15)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 1200);
+  }
+}
 function formatDate(ts){
   if(!ts) return '';
   const d = new Date(ts);
@@ -451,6 +489,7 @@ $('submitBtn').addEventListener('click', async ()=>{
       await recsCollection.add({...common, endorsements:[], createdAt:Date.now()});
     }
     resetForm();
+    launchConfetti(document.querySelector('.tab-btn[data-view="browse"]'));
     document.querySelector('.tab-btn[data-view="browse"]').click();
   } catch(e){
     alert('Could not save: '+e.message);
@@ -506,7 +545,12 @@ function loadEntryForEdit(r){
 
 function renderCatTabs(){
   const tabs = [{key:'all',label:'All'}, ...CATEGORY_ORDER.map(k=>({key:k,label:CATEGORY_LABELS[k]})), {key:'favorites',label:'Favorites'}, {key:'reviewer',label:'By reviewer'}];
-  $('catTabs').innerHTML = tabs.map(t=>`<button class="cat-tab ${activeCat===t.key?'active':''}" data-cat="${t.key}">${t.label}</button>`).join('');
+  $('catTabs').innerHTML = tabs.map(t=>{
+    const isActive = activeCat===t.key;
+    const accent = CATEGORY_ACCENT[t.key] || ['var(--gold)','var(--gold-dark)'];
+    const style = isActive ? ` style="background:${accent[0]};border-color:${accent[0]};color:${accent[1]};"` : '';
+    return `<button class="cat-tab ${isActive?'active':''}" data-cat="${t.key}"${style}>${t.label}</button>`;
+  }).join('');
   $('catTabs').querySelectorAll('.cat-tab').forEach(b=>{
     b.addEventListener('click', ()=>{
       activeCat = b.dataset.cat; activeReviewer = null; filters = {};
@@ -685,8 +729,20 @@ function renderEntries(){
       groups[key].count++;
     });
     const arr = Object.values(groups).sort((a,b)=> b.count-a.count || a.name.localeCompare(b.name));
-    list.innerHTML = arr.length===0 ? '<div class="empty">No recommendations yet.</div>' :
-      arr.map(g=>`<div class="reviewer-row" data-name="${escapeHtml(g.name)}"><span class="reviewer-name">${escapeHtml(g.name)}</span><span class="reviewer-count">${g.count} rec${g.count!==1?'s':''}</span></div>`).join('');
+    const now = new Date();
+    const monthCounts = {};
+    recs.forEach(r=>{
+      const d = new Date(r.createdAt);
+      if(d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear()){
+        const key = r.submittedBy.toLowerCase();
+        monthCounts[key] = monthCounts[key] || {name:r.submittedBy, count:0};
+        monthCounts[key].count++;
+      }
+    });
+    const topArr = Object.values(monthCounts).sort((a,b)=>b.count-a.count);
+    const shoutout = topArr.length ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gold);color:var(--gold-dark);border-radius:6px;padding:10px 14px;margin-bottom:14px;">&#127942; Most recs this month: ${escapeHtml(topArr[0].name)} (${topArr[0].count})</div>` : '';
+    list.innerHTML = shoutout + (arr.length===0 ? `<div class="empty">${emptyMessage()}</div>` :
+      arr.map(g=>`<div class="reviewer-row" data-name="${escapeHtml(g.name)}"><span class="reviewer-name">${escapeHtml(g.name)}</span><span class="reviewer-count">${g.count} rec${g.count!==1?'s':''}</span></div>`).join(''));
     list.querySelectorAll('.reviewer-row').forEach(row=>{
       row.addEventListener('click', ()=>{ activeReviewer = row.dataset.name; renderFilterRow(); renderEntries(); });
     });
@@ -707,7 +763,7 @@ function renderEntries(){
 
   const items = computeFilteredList(true);
   if(items.length===0){
-    list.innerHTML = '<div class="empty">No recommendations here yet. Add one from the Submit tab.</div>';
+    list.innerHTML = `<div class="empty">${emptyMessage()}<br><span style="font-size:12px;">Add one from the Submit tab.</span></div>`;
     return;
   }
   list.innerHTML = items.map(r=>`<div class="card">${buildCardHtml(r)}</div>`).join('');
