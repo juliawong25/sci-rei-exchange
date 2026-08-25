@@ -213,9 +213,6 @@ textarea{resize:vertical;min-height:60px;}
     <div class="search-row">
       <input type="search" id="searchInput" placeholder="Search by title or keyword...">
     </div>
-    <div style="text-align:right;margin-bottom:10px;">
-      <button class="back-link" id="wipeAllBtn" style="margin:0;">Clear all recommendations (testing)</button>
-    </div>
     <div id="backRow"></div>
     <div class="filter-row" id="filterRow"></div>
     <div id="spotlightWrap"></div>
@@ -571,17 +568,6 @@ function renderFilterRow(){
 }
 
 $('searchInput').addEventListener('input', renderEntries);
-$('wipeAllBtn').addEventListener('click', async ()=>{
-  if(!recsCollection){ alert('Database not connected yet.'); return; }
-  if(recs.length===0){ alert('Nothing to clear.'); return; }
-  const typed = prompt('Type DELETE to permanently remove all '+recs.length+' entries.');
-  if(typed !== 'DELETE') return;
-  const batch = db.batch();
-  const snap = await recsCollection.get();
-  snap.docs.forEach(d=> batch.delete(d.ref));
-  await batch.commit();
-  spotlight = {};
-});
 
 function computeFilteredList(excludeSpotlight){
   let items;
