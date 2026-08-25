@@ -242,14 +242,17 @@ const CATEGORY_LABELS = {eats:'Eats', watches:'Watches', reads:'Reads', experien
 const CATEGORY_ORDER = ['eats','watches','reads','experiences','shops','other'];
 const EATS_TYPES = ['Cafe','Takeout','Sit-down','Bar','Bakery','Fast casual'];
 const EXPERIENCE_TYPES = ['Spa','Fitness/gym','Wellness/recovery','Class/studio','Outdoor activity','Other'];
-const TYPE_OPTIONS = {eats: EATS_TYPES, experiences: EXPERIENCE_TYPES};
+const WATCHES_TYPES = ['TV Series','Movie','Short Film','Documentary','Anime','Limited Series'];
+const READS_TYPES = ['Physical book','E-book','Audiobook','Graphic novel/Comic'];
+const SHOPS_TYPES = ['In-store','Online'];
+const TYPE_OPTIONS = {eats: EATS_TYPES, experiences: EXPERIENCE_TYPES, watches: WATCHES_TYPES, reads: READS_TYPES, shops: SHOPS_TYPES};
 
 const CATEGORY_FIELDS = {
   eats: [{key:'location',label:'Location'},{key:'cuisine',label:'Cuisine'},{key:'types',label:'Type (select all that apply)',checks:EATS_TYPES}],
-  watches: [{key:'genre',label:'Genre'},{key:'where',label:'Where to watch'}],
-  reads: [{key:'author',label:'Author'},{key:'genre',label:'Genre'}],
+  watches: [{key:'genre',label:'Genre'},{key:'where',label:'Where to watch'},{key:'types',label:'Type (select all that apply)',checks:WATCHES_TYPES}],
+  reads: [{key:'author',label:'Author'},{key:'genre',label:'Genre'},{key:'types',label:'Format (select all that apply)',checks:READS_TYPES}],
   experiences: [{key:'location',label:'Location'},{key:'types',label:'Type (select all that apply)',checks:EXPERIENCE_TYPES}],
-  shops: [{key:'location',label:'Location'},{key:'sells',label:'What they sell'}],
+  shops: [{key:'location',label:'Location'},{key:'sells',label:'What they sell'},{key:'types',label:'Type (select all that apply)',checks:SHOPS_TYPES}],
   other: [{key:'tag',label:'Tag / type (optional)'}]
 };
 const CATEGORY_FILTERS = {
