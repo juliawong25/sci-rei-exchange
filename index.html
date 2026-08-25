@@ -272,6 +272,13 @@ let uploadedImageData = '';
 
 function $(id){return document.getElementById(id);}
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function formatDate(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  const day = String(d.getDate()).padStart(2,'0');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${day}/${months[d.getMonth()]}/${d.getFullYear()}`;
+}
 
 if(recsCollection){
   recsCollection.onSnapshot(snap=>{
@@ -597,7 +604,7 @@ function buildCardHtml(r){
         <div>
           <span class="tag ${r.category}">${CATEGORY_LABELS[r.category]}</span>
           <h3 class="entry-title">${escapeHtml(r.title)}</h3>
-          <div class="entry-meta">Recommended by ${escapeHtml(r.submittedBy)}${r.editedAt ? ' &middot; edited' : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
+          <div class="entry-meta">Recommended by ${escapeHtml(r.submittedBy)} on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
         </div>
         <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}</div>
       </div>
