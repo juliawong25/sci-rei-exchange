@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SCI-Rec-Exchange</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -19,6 +20,11 @@
 *{box-sizing:border-box;}
 body{margin:0;background:var(--board);font-family:'Inter',sans-serif;color:var(--paper);}
 .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px;}
+@media(max-width:480px){
+  .wrap{padding:20px 14px 48px;}
+  header h1{font-size:26px;}
+  .card{padding:18px 16px;}
+}
 header h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0 0 4px;color:var(--paper);}
 header p{margin:0;color:#B9C4BE;font-size:14px;}
 .conn-banner{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;background:var(--danger);color:#FCEBEB;padding:8px 12px;border-radius:4px;margin-bottom:16px;display:none;}
@@ -83,7 +89,7 @@ textarea{resize:vertical;min-height:60px;}
 .spacer{flex:1;}
 
 .entries{display:flex;flex-direction:column;gap:14px;}
-.entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.entry-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;}
 .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:3px;margin-bottom:8px;}
 .tag.eats{background:#F6E6C4;color:var(--gold-dark);}
 .tag.watches{background:#F5D9D1;color:var(--coral-dark);}
@@ -246,7 +252,7 @@ const CATEGORY_ORDER = ['eats','watches','reads','experiences','shops','other'];
 const EATS_TYPES = ['Cafe','Takeout','Sit-down','Bar','Bakery','Fast casual'];
 const EXPERIENCE_TYPES = ['Spa','Fitness/gym','Wellness/recovery','Class/studio','Outdoor activity','Other'];
 const WATCHES_TYPES = ['TV Series','Movie','Short Film','Documentary','Anime','Limited Series'];
-const READS_TYPES = ['Physical book','E-book','Audiobook','Graphic novel/Comic'];
+const READS_TYPES = ['Physical book','E-book','Audiobook','Graphic novel/Comic','Blog/Substack'];
 const SHOPS_TYPES = ['In-store','Online'];
 const TYPE_OPTIONS = {eats: EATS_TYPES, experiences: EXPERIENCE_TYPES, watches: WATCHES_TYPES, reads: READS_TYPES, shops: SHOPS_TYPES};
 
