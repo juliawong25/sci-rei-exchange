@@ -114,7 +114,7 @@ textarea{resize:vertical;min-height:60px;}
 .entry-desc{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:6px;}
 .entry-img{width:100%;max-height:170px;object-fit:cover;border-radius:4px;margin-bottom:10px;display:block;}
 .entry-link{font-size:12px;color:var(--teal-dark);text-decoration:none;font-weight:500;}
-.stars-static{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
+.stars-static{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--gold);letter-spacing:1px;white-space:nowrap;-webkit-text-stroke:0.6px #2E2A5C;}
 .fav-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:14px;padding:4px 10px;cursor:pointer;}
 .fav-btn.on{background:var(--gold);border-color:var(--gold);color:var(--gold-dark);}
 .empty{color:var(--ink-soft);font-size:14px;padding:30px 0;text-align:center;}
@@ -133,8 +133,10 @@ textarea{resize:vertical;min-height:60px;}
 .reviewer-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--ink);}
 .reviewer-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);}
 .back-link{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:var(--ink-soft);background:none;border:none;cursor:pointer;margin-bottom:14px;padding:0;}
-.entries .card{transition:transform .15s ease, box-shadow .15s ease;}
+.entries .card{position:relative;transition:transform .15s ease, box-shadow .15s ease;}
 .entries .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(51,45,107,.20);}
+.card-delete-btn{position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;color:var(--danger);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:2px 4px;}
+.card-delete-btn:hover{text-decoration:underline;}
 @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(140px) rotate(360deg);opacity:0;}}
 .confetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall .9s ease-out forwards;}
 @keyframes spotlight-in{0%{transform:translateY(-18px) scale(.95);opacity:0;}60%{transform:translateY(4px) scale(1.02);opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
@@ -661,17 +663,18 @@ function buildCardHtml(r){
   ).join('');
   return `
     <div class="card-inner">
+      <button class="card-delete-btn" data-del="${r.id}">Delete</button>
       ${r.image ? `<img class="entry-img" src="${escapeHtml(r.image)}" onerror="this.style.display='none'">` : ''}
       <div class="entry-top">
         <div>
           <span class="tag ${r.category}">${CATEGORY_LABELS[r.category]}</span>
           <h3 class="entry-title">${escapeHtml(r.title)}</h3>
-          <div class="entry-meta">Recommended by <b style="color:var(--ink);font-weight:600;">${escapeHtml(r.submittedBy)}</b> on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''} &middot; <button class="entry-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--danger);" data-del="${r.id}">Delete</button></div>
+          <div class="entry-meta">Recommended by <b style="color:var(--ink);font-weight:600;">${escapeHtml(r.submittedBy)}</b> on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''}</div>
         </div>
         <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}<button class="fav-btn ${favorites.includes(r.id)?'on':''}" data-fav="${r.id}">${favorites.includes(r.id) ? '\u2605 Saved' : '\u2606 Save'}</button></div>
       </div>
       <div class="entry-fields">${fieldsHtml}</div>
-      ${r.description ? `<div class="entry-desc">${escapeHtml(r.description)}</div>` : ''}
+      ${r.description ? `<div class="entry-desc"><b style="color:var(--ink);font-weight:600;">Description:</b> ${escapeHtml(r.description)}</div>` : ''}
       <div class="endorsements">
         ${endorseHtml}
         <button class="endorse-add" data-id="${r.id}">+ I've also tried this</button>
