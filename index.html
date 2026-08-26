@@ -491,7 +491,7 @@ $('submitBtn').addEventListener('click', async ()=>{
       await recsCollection.add({...common, endorsements:[], createdAt:Date.now()});
     }
     resetForm();
-    launchConfetti(document.querySelector('.tab-btn[data-view="browse"]'));
+    launchConfetti($('submitBtn'));
     document.querySelector('.tab-btn[data-view="browse"]').click();
   } catch(e){
     alert('Could not save: '+e.message);
