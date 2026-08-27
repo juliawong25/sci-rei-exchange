@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SCI-Rec-Exchange</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23182422'/%3E%3Cpath d='M50 18 L61 41 L86 45 L68 62 L72 87 L50 75 L28 87 L32 62 L14 45 L39 41 Z' fill='%23D9A441'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
@@ -137,7 +137,7 @@ textarea{resize:vertical;min-height:60px;}
 .entries .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(51,45,107,.20);}
 .card-delete-btn{background:none;border:none;cursor:pointer;color:var(--danger);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:0;}
 .card-delete-btn:hover{text-decoration:underline;}
-.entry-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.card-top-row{display:flex;justify-content:flex-end;margin-bottom:8px;}
 @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(140px) rotate(360deg);opacity:0;}}
 .confetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall .9s ease-out forwards;}
 @keyframes spotlight-in{0%{transform:translateY(-18px) scale(.95);opacity:0;}60%{transform:translateY(4px) scale(1.02);opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
@@ -664,6 +664,7 @@ function buildCardHtml(r){
   ).join('');
   return `
     <div class="card-inner">
+      <div class="card-top-row"><button class="card-delete-btn" data-del="${r.id}">Delete</button></div>
       ${r.image ? `<img class="entry-img" src="${escapeHtml(r.image)}" onerror="this.style.display='none'">` : ''}
       <div class="entry-top">
         <div>
@@ -671,10 +672,7 @@ function buildCardHtml(r){
           <h3 class="entry-title">${escapeHtml(r.title)}</h3>
           <div class="entry-meta">Recommended by <b style="color:var(--ink);font-weight:600;">${escapeHtml(r.submittedBy)}</b> on ${formatDate(r.createdAt)}${r.editedAt ? ' &middot; edited '+formatDate(r.editedAt) : ''}${r.link ? ' &middot; <a class="entry-link" href="'+escapeHtml(r.link)+'" target="_blank" rel="noopener">Visit link</a>' : ''}</div>
         </div>
-        <div class="entry-right">
-          <button class="card-delete-btn" data-del="${r.id}">Delete</button>
-          <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}<button class="fav-btn ${favorites.includes(r.id)?'on':''}" data-fav="${r.id}">${favorites.includes(r.id) ? '\u2605 Saved' : '\u2606 Save'}</button></div>
-        </div>
+        <div class="stars-static">${'&#9733;'.repeat(r.rating)}${'&#9734;'.repeat(5-r.rating)}<button class="fav-btn ${favorites.includes(r.id)?'on':''}" data-fav="${r.id}">${favorites.includes(r.id) ? '\u2605 Saved' : '\u2606 Save'}</button></div>
       </div>
       <div class="entry-fields">${fieldsHtml}</div>
       ${r.description ? `<div class="entry-desc"><b style="color:var(--ink);font-weight:600;">Description:</b> ${escapeHtml(r.description)}</div>` : ''}
