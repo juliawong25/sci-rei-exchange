@@ -138,8 +138,8 @@ textarea{resize:vertical;min-height:60px;}
 .card-delete-btn{background:none;border:none;cursor:pointer;color:var(--danger);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:0;}
 .card-delete-btn:hover{text-decoration:underline;}
 .card-top-row{display:flex;justify-content:flex-end;margin-bottom:8px;}
-@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(140px) rotate(360deg);opacity:0;}}
-.confetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall .9s ease-out forwards;}
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(220px) rotate(560deg);opacity:0;}}
+.confetti-piece{position:fixed;pointer-events:none;z-index:9999;border-radius:2px;animation:confetti-fall 1.4s ease-out forwards;}
 @keyframes spotlight-in{0%{transform:translateY(-18px) scale(.95);opacity:0;}60%{transform:translateY(4px) scale(1.02);opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
 .spotlight-card{border:2px solid var(--gold);animation:spotlight-in .45s ease-out;}
 .spotlight-label{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
@@ -154,6 +154,7 @@ textarea{resize:vertical;min-height:60px;}
       <div class="banner-tail banner-tail-right"></div>
     </div>
     <p>Shared recommendations from the team — eats, watches, reads, experiences, shops, and more!</p>
+    <p style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-style:italic;">(P.S., refresh the site every once in a while to load new changes)</p>
   </header>
   <div class="conn-banner" id="connBanner">Not connected to the database yet — add your Firebase config in the HTML file.</div>
 
@@ -316,15 +317,17 @@ function emptyMessage(){ return EMPTY_QUIPS[Math.floor(Math.random()*EMPTY_QUIPS
 function launchConfetti(originEl){
   const colors = ['#FCCA46','#E63946','#6A994E','#F4A261','#FF9F1C'];
   const rect = originEl.getBoundingClientRect();
-  for(let i=0;i<24;i++){
+  for(let i=0;i<40;i++){
     const p = document.createElement('div');
     p.className = 'confetti-piece';
-    p.style.left = (rect.left + rect.width/2 + (Math.random()*160-80)) + 'px';
+    const s = 7 + Math.random()*7;
+    p.style.width = s+'px'; p.style.height = s+'px';
+    p.style.left = (rect.left + rect.width/2 + (Math.random()*220-110)) + 'px';
     p.style.top = (rect.top + rect.height/2) + 'px';
     p.style.background = colors[Math.floor(Math.random()*colors.length)];
-    p.style.animationDelay = (Math.random()*0.15)+'s';
+    p.style.animationDelay = (Math.random()*0.25)+'s';
     document.body.appendChild(p);
-    setTimeout(()=>p.remove(), 1200);
+    setTimeout(()=>p.remove(), 2000);
   }
 }
 function formatDate(ts){
@@ -610,7 +613,12 @@ function renderFilterRow(){
   $('surpriseBtn').addEventListener('click', ()=>{
     const pool = computeFilteredList(false);
     if(pool.length===0){ $('spotlightWrap').innerHTML = '<div class="empty">Nothing matches the current filters to pick from.</div>'; return; }
-    spotlight[activeCat] = pool[Math.floor(Math.random()*pool.length)];
+    const prevId = spotlight[activeCat] ? spotlight[activeCat].id : null;
+    let pick = pool[Math.floor(Math.random()*pool.length)];
+    if(pool.length>1){
+      while(pick.id===prevId){ pick = pool[Math.floor(Math.random()*pool.length)]; }
+    }
+    spotlight[activeCat] = pick;
     renderEntries();
   });
 }
